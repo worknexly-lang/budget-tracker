@@ -143,14 +143,16 @@ export default function EmiAnalyzerPage() {
   const handleMarkAsPaid = (index: number) => {
     setSavedLoans(prev => {
         const updatedLoans = [...prev];
-        const loan = updatedLoans[index];
-        if (loan.emisPending > 0) {
-            loan.emisPaid += 1;
-            loan.emisPending -= 1;
-            loan.lastUpdated = new Date().toISOString();
-            if (loan.emisPending === 0) {
-                loan.status = 'On Track'; 
+        const loanToUpdate = { ...updatedLoans[index] };
+        
+        if (loanToUpdate.emisPending > 0) {
+            loanToUpdate.emisPaid += 1;
+            loanToUpdate.emisPending -= 1;
+            loanToUpdate.lastUpdated = new Date().toISOString();
+            if (loanToUpdate.emisPending === 0) {
+                loanToUpdate.status = 'On Track'; 
             }
+            updatedLoans[index] = loanToUpdate;
         }
         return updatedLoans;
     });
