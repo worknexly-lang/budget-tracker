@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { format, isThisMonth, parseISO } from "date-fns";
 import EmiSummaryCard from "./emi-summary-card";
+import type { Transaction } from "@/types";
 
 const formSchema = z.object({
   file: z.instanceof(File).refine(file => file.size > 0, "Please upload a file."),
@@ -141,25 +142,38 @@ export default function EmiAnalyzerPage() {
   };
 
   const handleMarkAsPaid = (index: number) => {
-    setSavedLoans(prev => {
-        const updatedLoans = [...prev];
-        const loanToUpdate = { ...updatedLoans[index] };
-        
-        if (loanToUpdate.emisPending > 0) {
-            loanToUpdate.emisPaid += 1;
-            loanToUpdate.emisPending -= 1;
-            loanToUpdate.lastUpdated = new Date().toISOString();
-            if (loanToUpdate.emisPending === 0) {
-                loanToUpdate.status = 'On Track'; 
-            }
-            updatedLoans[index] = loanToUpdate;
+    const updatedLoans = [...savedLoans];
+    const loanToUpdate = { ...updatedLoans[index] };
+
+    if (loanToUpdate.emisPending > 0) {
+        loanToUpdate.emisPaid += 1;
+        loanToUpdate.emisPending -= 1;
+        loanToUpdate.lastUpdated = new Date().toISOString();
+        if (loanToUpdate.emisPending === 0) {
+            loanToUpdate.status = 'On Track'; 
         }
-        return updatedLoans;
-    });
-    toast({
-        title: "EMI Marked as Paid",
-        description: "You've successfully tracked this month's payment.",
-    });
+        updatedLoans[index] = loanToUpdate;
+        setSavedLoans(updatedLoans);
+
+        // Add transaction
+        const newTransaction: Transaction = {
+            id: crypto.randomUUID(),
+            type: "expense",
+            category: "Bills",
+            amount: loanToUpdate.emiAmount,
+            description: `EMI for ${loanToUpdate.loanName}`,
+            date: new Date().toISOString(),
+        };
+
+        const storedTransactions = localStorage.getItem("transactions");
+        const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+        localStorage.setItem("transactions", JSON.stringify([newTransaction, ...transactions]));
+
+        toast({
+            title: "EMI Marked as Paid",
+            description: "An expense transaction has been automatically created.",
+        });
+    }
   };
 
 
