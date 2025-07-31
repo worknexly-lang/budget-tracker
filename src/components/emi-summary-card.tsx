@@ -1,0 +1,96 @@
+
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText, ArrowRight } from "lucide-react";
+import type { EmiAnalysis } from "@/ai/flows/analyze-emi-statement";
+import { isThisMonth, parseISO } from "date-fns";
+
+export default function EmiSummaryCard() {
+  const [savedLoans, setSavedLoans] = useState<EmiAnalysis[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const storedLoans = localStorage.getItem("savedLoans");
+    if (storedLoans) {
+      setSavedLoans(JSON.parse(storedLoans));
+    }
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6" />
+            <CardTitle>EMI Loan Tracker</CardTitle>
+          </div>
+           <CardDescription>
+            A summary of your active loans.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-24 rounded-md bg-muted animate-pulse" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const activeLoans = savedLoans.filter(loan => loan.emisPending > 0);
+  const loansDueThisMonth = activeLoans.filter(loan => {
+      const hasPaidThisMonth = loan.lastUpdated ? isThisMonth(parseISO(loan.lastUpdated)) : false;
+      return !hasPaidThisMonth;
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <FileText className="h-6 w-6" />
+          <CardTitle>EMI Loan Tracker</CardTitle>
+        </div>
+        <CardDescription>
+          A summary of your active loans.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {activeLoans.length > 0 ? (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Active Loans</span>
+              <span className="font-bold text-lg">{activeLoans.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Payments Due</span>
+               <span className={`font-bold text-lg ${loansDueThisMonth.length > 0 ? 'text-yellow-500' : 'text-green-500'}`}>{loansDueThisMonth.length}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground py-4">
+            <p>No active loans found.</p>
+            <p className="text-xs">Add one in the EMI Analyzer.</p>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter>
+        <Button asChild className="w-full">
+          <Link href="/dashboard/emi">
+            Go to EMI Analyzer
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}

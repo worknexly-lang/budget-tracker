@@ -8,6 +8,7 @@ import SavingsGoal from "@/components/savings-goal";
 import TransactionsTable from "@/components/transactions-table";
 import CategoryChart from "@/components/category-chart";
 import AddTransactionForm from "@/components/add-transaction-form";
+import EmiSummaryCard from "@/components/emi-summary-card";
 import { DollarSign } from "lucide-react";
 
 export default function Dashboard() {
@@ -98,13 +99,14 @@ export default function Dashboard() {
             <AddTransactionForm onAddTransaction={handleAddTransaction} />
           </aside>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <CategoryChart transactions={transactions} />
             <SavingsGoal
               goal={savingsGoal}
               balance={balance}
               onSetGoal={setSavingsGoal}
             />
+            <EmiSummaryCard />
         </div>
       </main>
     </div>
