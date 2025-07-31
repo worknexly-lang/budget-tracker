@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -23,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, Upload, FileText, BarChart, Calendar, Banknote, Hourglass, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Upload, FileText, BarChart, Calendar, Banknote, Hourglass, CheckCircle, XCircle, Save, Trash2, List } from "lucide-react";
 import { analyzeEmiStatement, type EmiAnalysis } from "@/ai/flows/analyze-emi-statement";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
@@ -35,6 +35,9 @@ const formSchema = z.object({
 export default function EmiAnalyzerPage() {
   const [analysis, setAnalysis] = useState<EmiAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [savedLoans, setSavedLoans] = useState<EmiAnalysis[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,6 +46,20 @@ export default function EmiAnalyzerPage() {
       file: undefined,
     },
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+    const storedLoans = localStorage.getItem("savedLoans");
+    if (storedLoans) {
+      setSavedLoans(JSON.parse(storedLoans));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem("savedLoans", JSON.stringify(savedLoans));
+    }
+  }, [savedLoans, isMounted]);
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -90,16 +107,36 @@ export default function EmiAnalyzerPage() {
         (newAnalysis[field] as string) = String(value);
     }
 
-    if (field === 'emisPaid') {
-        const emisPaid = Number(value);
-        if (!isNaN(emisPaid) && emisPaid <= newAnalysis.tenure) {
-            newAnalysis.emisPending = newAnalysis.tenure - emisPaid;
+    if (field === 'emisPaid' || field === 'tenure') {
+        const emisPaid = field === 'emisPaid' ? Number(value) : newAnalysis.emisPaid;
+        const tenure = field === 'tenure' ? Number(value) : newAnalysis.tenure;
+        
+        if (!isNaN(emisPaid) && !isNaN(tenure) && emisPaid <= tenure) {
+            newAnalysis.emisPending = tenure - emisPaid;
         }
     }
 
     setAnalysis(newAnalysis);
   };
 
+  const handleSaveDetails = () => {
+    if (analysis) {
+        setSavedLoans(prev => [...prev, analysis]);
+        setAnalysis(null);
+        toast({
+            title: "Loan Saved",
+            description: "Your loan details have been saved successfully.",
+        });
+    }
+  };
+  
+  const handleDeleteLoan = (index: number) => {
+    setSavedLoans(prev => prev.filter((_, i) => i !== index));
+    toast({
+        title: "Loan Deleted",
+        description: "The loan has been removed from your saved list.",
+    });
+  };
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -258,11 +295,50 @@ export default function EmiAnalyzerPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">Save Details</Button>
+              <Button className="w-full" onClick={handleSaveDetails}>
+                <Save className="mr-2 h-4 w-4" />
+                Save Details
+              </Button>
             </CardFooter>
           </Card>
         )}
       </div>
+
+        {savedLoans.length > 0 && (
+            <Card className="lg:col-span-2">
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <List className="h-6 w-6" />
+                        <CardTitle>Saved Loans</CardTitle>
+                    </div>
+                    <CardDescription>
+                        A list of your saved loan analyses.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {savedLoans.map((loan, index) => (
+                        <div key={index} className="border p-4 rounded-lg space-y-2 relative">
+                            <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => handleDeleteLoan(index)}>
+                                <Trash2 className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                            <h3 className="font-semibold text-lg">{loan.loanName}</h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+                                <p><strong>Total:</strong> {formatCurrency(loan.totalAmount)}</p>
+                                <p><strong>EMI:</strong> {formatCurrency(loan.emiAmount)}</p>
+                                <p><strong>Rate:</strong> {loan.interestRate || 'N/A'}%</p>
+                                <p><strong>Paid:</strong> {loan.emisPaid} / {loan.tenure}</p>
+                                <p><strong>Pending:</strong> {loan.emisPending} EMIs</p>
+                                <p><strong>Status:</strong> 
+                                    <span className={`font-bold ${loan.status === 'On Track' ? 'text-green-500' : 'text-red-500'}`}>
+                                        {loan.status}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+        )}
     </div>
   );
 }
