@@ -32,44 +32,44 @@ export default function DashboardLayout({
           </div>
           <SidebarMenu className="flex-1">
             <SidebarMenuItem>
-                <Link href="/dashboard" passHref legacyBehavior>
+                <Link href="/dashboard">
                     <SidebarMenuButton asChild isActive={pathname === '/dashboard'}>
-                        <a>
+                        <span>
                             <Home />
                             Dashboard
-                        </a>
+                        </span>
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-                <Link href="/dashboard/analytics" passHref legacyBehavior>
+                <Link href="/dashboard/analytics">
                     <SidebarMenuButton asChild isActive={pathname === '/dashboard/analytics'}>
-                        <a>
+                        <span>
                             <BarChartHorizontal />
                             Analytics
-                        </a>
+                        </span>
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-                <Link href="/dashboard/savings" passHref legacyBehavior>
+                <Link href="/dashboard/savings">
                     <SidebarMenuButton asChild isActive={pathname === '/dashboard/savings'}>
-                        <a>
+                        <span>
                             <Target />
                             Savings
-                        </a>
+                        </span>
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
           </SidebarMenu>
           <SidebarMenu>
             <SidebarMenuItem>
-                <Link href="#" passHref legacyBehavior>
+                <Link href="#">
                     <SidebarMenuButton asChild>
-                        <a>
+                        <span>
                             <Settings />
                             Settings
-                        </a>
+                        </span>
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
