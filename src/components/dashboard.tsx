@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -7,7 +8,6 @@ import SavingsGoal from "@/components/savings-goal";
 import TransactionsTable from "@/components/transactions-table";
 import CategoryChart from "@/components/category-chart";
 import AddTransactionForm from "@/components/add-transaction-form";
-import EmiDashboard from "@/components/emi-dashboard";
 import { DollarSign } from "lucide-react";
 
 export default function Dashboard() {
@@ -105,9 +105,6 @@ export default function Dashboard() {
               balance={balance}
               onSetGoal={setSavingsGoal}
             />
-        </div>
-        <div>
-            <EmiDashboard />
         </div>
       </main>
     </div>
