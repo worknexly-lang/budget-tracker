@@ -76,6 +76,31 @@ export default function EmiAnalyzerPage() {
     }
   };
 
+  const handleAnalysisChange = (field: keyof EmiAnalysis, value: string | number) => {
+    if (!analysis) return;
+
+    const newAnalysis = { ...analysis };
+
+    if (typeof newAnalysis[field] === 'number') {
+        const numValue = Number(value);
+        if (!isNaN(numValue)) {
+            (newAnalysis[field] as number) = numValue;
+        }
+    } else {
+        (newAnalysis[field] as string) = String(value);
+    }
+
+    if (field === 'emisPaid') {
+        const emisPaid = Number(value);
+        if (!isNaN(emisPaid) && emisPaid <= newAnalysis.tenure) {
+            newAnalysis.emisPending = newAnalysis.tenure - emisPaid;
+        }
+    }
+
+    setAnalysis(newAnalysis);
+  };
+
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -142,7 +167,7 @@ export default function EmiAnalyzerPage() {
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle>Analysis Summary</CardTitle>
-              <CardDescription>Review the extracted details from your statement.</CardDescription>
+              <CardDescription>Review and edit the extracted details from your statement.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
@@ -150,42 +175,72 @@ export default function EmiAnalyzerPage() {
                   <FileText className="h-5 w-5" />
                   <span className="font-semibold">Loan Name / Lender</span>
                 </div>
-                <span className="font-mono">{analysis.loanName}</span>
+                <Input
+                    className="font-mono text-right bg-transparent border-0 h-auto p-0"
+                    value={analysis.loanName}
+                    onChange={(e) => handleAnalysisChange('loanName', e.target.value)}
+                />
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-3">
                   <Banknote className="h-5 w-5" />
                   <span className="font-semibold">Total Amount</span>
                 </div>
-                <span className="font-mono">{formatCurrency(analysis.totalAmount)}</span>
+                 <Input
+                    type="number"
+                    className="font-mono text-right bg-transparent border-0 h-auto p-0"
+                    value={analysis.totalAmount}
+                    onChange={(e) => handleAnalysisChange('totalAmount', e.target.value)}
+                />
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-3">
                   <Banknote className="h-5 w-5" />
                   <span className="font-semibold">EMI Amount</span>
                 </div>
-                <span className="font-mono">{formatCurrency(analysis.emiAmount)}</span>
+                <Input
+                    type="number"
+                    className="font-mono text-right bg-transparent border-0 h-auto p-0"
+                    value={analysis.emiAmount}
+                    onChange={(e) => handleAnalysisChange('emiAmount', e.target.value)}
+                />
               </div>
                <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-3">
                   <BarChart className="h-5 w-5" />
-                  <span className="font-semibold">Interest Rate</span>
+                  <span className="font-semibold">Interest Rate (%)</span>
                 </div>
-                <span className="font-mono">{analysis.interestRate ? `${analysis.interestRate}%` : 'N/A'}</span>
+                <Input
+                    type="number"
+                    className="font-mono text-right bg-transparent border-0 h-auto p-0"
+                    value={analysis.interestRate || ''}
+                    placeholder="N/A"
+                    onChange={(e) => handleAnalysisChange('interestRate', e.target.value)}
+                />
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5" />
                   <span className="font-semibold">Tenure (Months)</span>
                 </div>
-                <span className="font-mono">{analysis.tenure}</span>
+                 <Input
+                    type="number"
+                    className="font-mono text-right bg-transparent border-0 h-auto p-0"
+                    value={analysis.tenure}
+                    onChange={(e) => handleAnalysisChange('tenure', e.target.value)}
+                />
               </div>
                <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-green-500" />
                   <span className="font-semibold">EMIs Paid</span>
                 </div>
-                <span className="font-mono">{analysis.emisPaid}</span>
+                <Input
+                    type="number"
+                    className="font-mono text-right bg-transparent border-0 h-auto p-0"
+                    value={analysis.emisPaid}
+                    onChange={(e) => handleAnalysisChange('emisPaid', e.target.value)}
+                 />
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-3">
