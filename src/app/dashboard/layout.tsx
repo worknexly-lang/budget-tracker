@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { Home, Settings, DollarSign, BarChartHorizontal } from "lucide-react";
+import { Home, Settings, DollarSign, BarChartHorizontal, Target } from "lucide-react";
 import { ModeToggle } from '@/components/mode-toggle';
 
 export default function DashboardLayout({
@@ -15,6 +15,7 @@ export default function DashboardLayout({
   const getPageTitle = () => {
     if (pathname === '/dashboard') return 'Overview';
     if (pathname === '/dashboard/analytics') return 'Analytics';
+    if (pathname === '/dashboard/savings') return 'Savings Goal';
     return 'Dashboard';
   }
 
@@ -38,6 +39,12 @@ export default function DashboardLayout({
               <SidebarMenuButton href="/dashboard/analytics" isActive={pathname === '/dashboard/analytics'}>
                 <BarChartHorizontal />
                 Analytics
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton href="/dashboard/savings" isActive={pathname === '/dashboard/savings'}>
+                <Target />
+                Savings
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
