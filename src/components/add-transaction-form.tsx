@@ -1,19 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -43,12 +42,11 @@ const formSchema = z.object({
   category: z.string().min(1, "Category is required."),
 });
 
-type AddTransactionDialogProps = {
+type AddTransactionFormProps = {
   onAddTransaction: (transaction: Omit<Transaction, "id" | "date">) => void;
 };
 
-export default function AddTransactionDialog({ onAddTransaction }: AddTransactionDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function AddTransactionForm({ onAddTransaction }: AddTransactionFormProps) {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const { toast } = useToast();
 
@@ -111,26 +109,19 @@ export default function AddTransactionDialog({ onAddTransaction }: AddTransactio
       description: `${values.type.charAt(0).toUpperCase() + values.type.slice(1)} of ${values.amount} for ${values.description} has been added.`,
     });
     form.reset();
-    setIsOpen(false);
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Transaction
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
-          <DialogDescription>
-            Add a new income or expense to your budget.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Add Transaction</CardTitle>
+        <CardDescription>
+          Add a new income or expense to your budget.
+        </CardDescription>
+      </CardHeader>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <CardContent className="space-y-4">
             <FormField
               control={form.control}
               name="type"
@@ -138,7 +129,14 @@ export default function AddTransactionDialog({ onAddTransaction }: AddTransactio
                 <FormItem className="space-y-3">
                   <FormControl>
                     <RadioGroup
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        if (value === 'income') {
+                          form.setValue('category', 'Income', { shouldValidate: true });
+                        } else {
+                          form.setValue('category', '', { shouldValidate: true });
+                        }
+                      }}
                       defaultValue={field.value}
                       className="flex space-x-4"
                     >
@@ -216,13 +214,15 @@ export default function AddTransactionDialog({ onAddTransaction }: AddTransactio
                 )}
               />
             )}
-
-            <DialogFooter>
-              <Button type="submit">Add Transaction</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="w-full">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Transaction
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
+    </Card>
   );
 }

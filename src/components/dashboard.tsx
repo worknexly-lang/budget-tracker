@@ -6,7 +6,7 @@ import Overview from "@/components/overview";
 import SavingsGoal from "@/components/savings-goal";
 import TransactionsTable from "@/components/transactions-table";
 import CategoryChart from "@/components/category-chart";
-import AddTransactionDialog from "@/components/add-transaction-dialog";
+import AddTransactionForm from "@/components/add-transaction-form";
 
 export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -71,7 +71,6 @@ export default function Dashboard() {
         <h1 className="text-3xl font-bold text-foreground tracking-tight">
           BudgetWise
         </h1>
-        <AddTransactionDialog onAddTransaction={handleAddTransaction} />
       </header>
 
       <main className="flex flex-col gap-8">
@@ -89,6 +88,7 @@ export default function Dashboard() {
             />
           </div>
           <aside className="lg:col-span-1 flex flex-col gap-8">
+            <AddTransactionForm onAddTransaction={handleAddTransaction} />
             <SavingsGoal
               goal={savingsGoal}
               balance={balance}
