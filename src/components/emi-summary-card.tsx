@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, ArrowRight } from "lucide-react";
 import type { EmiAnalysis } from "@/ai/flows/analyze-emi-statement";
 import { isThisMonth, parseISO } from "date-fns";
+import { formatCurrency } from "@/lib/utils";
 
 export default function EmiSummaryCard() {
   const [savedLoans, setSavedLoans] = useState<EmiAnalysis[]>([]);
@@ -68,6 +69,9 @@ export default function EmiSummaryCard() {
       const hasPaidThisMonth = loan.lastUpdated ? isThisMonth(parseISO(loan.lastUpdated)) : false;
       return !hasPaidThisMonth;
   });
+  
+  const totalMonthlyEmi = activeLoans.reduce((sum, loan) => sum + loan.emiAmount, 0);
+  const totalRemainingBalance = activeLoans.reduce((sum, loan) => sum + (loan.emiAmount * loan.emisPending), 0);
 
   return (
     <Card>
@@ -82,7 +86,7 @@ export default function EmiSummaryCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {activeLoans.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Active Loans</span>
               <span className="font-bold text-lg">{activeLoans.length}</span>
@@ -90,6 +94,14 @@ export default function EmiSummaryCard() {
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Payments Due</span>
                <span className={`font-bold text-lg ${loansDueThisMonth.length > 0 ? 'text-yellow-500' : 'text-green-500'}`}>{loansDueThisMonth.length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Total Monthly EMI</span>
+              <span className="font-bold text-sm">{formatCurrency(totalMonthlyEmi)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Total Remaining</span>
+              <span className="font-bold text-sm">{formatCurrency(totalRemainingBalance)}</span>
             </div>
           </div>
         ) : (
