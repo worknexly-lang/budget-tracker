@@ -11,6 +11,7 @@ import {
   Receipt,
   CircleHelp,
   Landmark,
+  FileText,
 } from "lucide-react";
 import type { Category } from "@/types";
 

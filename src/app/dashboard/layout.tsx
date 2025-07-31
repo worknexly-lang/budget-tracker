@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { Home, Settings, DollarSign, BarChartHorizontal, Target } from "lucide-react";
+import { Home, Settings, DollarSign, BarChartHorizontal, Target, FileText } from "lucide-react";
 import { ModeToggle } from '@/components/mode-toggle';
 
 export default function DashboardLayout({
@@ -18,6 +18,7 @@ export default function DashboardLayout({
     if (pathname === '/dashboard') return 'Overview';
     if (pathname === '/dashboard/analytics') return 'Analytics';
     if (pathname === '/dashboard/savings') return 'Savings Goal';
+    if (pathname === '/dashboard/emi') return 'EMI Analyzer';
     return 'Dashboard';
   }
 
@@ -57,6 +58,16 @@ export default function DashboardLayout({
                         <span>
                             <Target />
                             Savings
+                        </span>
+                    </SidebarMenuButton>
+                </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+                <Link href="/dashboard/emi">
+                    <SidebarMenuButton asChild isActive={pathname === '/dashboard/emi'}>
+                        <span>
+                            <FileText />
+                            EMI Analyzer
                         </span>
                     </SidebarMenuButton>
                 </Link>
