@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
-import { ArrowDownLeft, ArrowUpRight, Banknote } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Banknote, IndianRupee } from "lucide-react";
 
 type OverviewProps = {
   income: number;
@@ -17,11 +17,11 @@ type OverviewProps = {
 
 export default function Overview({ income, expenses, balance }: OverviewProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-          <ArrowUpRight className="h-4 w-4 text-green-500" />
+          <IndianRupee className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(income)}</div>
@@ -33,7 +33,7 @@ export default function Overview({ income, expenses, balance }: OverviewProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-          <ArrowDownLeft className="h-4 w-4 text-red-500" />
+          <IndianRupee className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(expenses)}</div>
@@ -45,7 +45,7 @@ export default function Overview({ income, expenses, balance }: OverviewProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Balance</CardTitle>
-          <Banknote className="h-4 w-4 text-muted-foreground" />
+          <IndianRupee className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(balance)}</div>

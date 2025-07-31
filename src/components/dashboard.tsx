@@ -7,6 +7,7 @@ import SavingsGoal from "@/components/savings-goal";
 import TransactionsTable from "@/components/transactions-table";
 import CategoryChart from "@/components/category-chart";
 import AddTransactionForm from "@/components/add-transaction-form";
+import { DollarSign } from "lucide-react";
 
 export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -62,16 +63,21 @@ export default function Dashboard() {
   };
   
   if (!isMounted) {
-    return null; // Or a loading spinner
+    // You can render a loading skeleton here
+    return (
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8">
-      <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">
-          BudgetWise
-        </h1>
-      </header>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+       <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+      </div>
 
       <main className="flex flex-col gap-8">
         <Overview
@@ -81,21 +87,23 @@ export default function Dashboard() {
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <TransactionsTable
+          <div className="lg:col-span-2 space-y-8">
+             <TransactionsTable
               transactions={transactions}
               onDeleteTransaction={handleDeleteTransaction}
             />
           </div>
           <aside className="lg:col-span-1 flex flex-col gap-8">
             <AddTransactionForm onAddTransaction={handleAddTransaction} />
+          </aside>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <CategoryChart transactions={transactions} />
             <SavingsGoal
               goal={savingsGoal}
               balance={balance}
               onSetGoal={setSavingsGoal}
             />
-            <CategoryChart transactions={transactions} />
-          </aside>
         </div>
       </main>
     </div>

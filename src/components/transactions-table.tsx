@@ -56,7 +56,7 @@ export default function TransactionsTable({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[350px]">
           <Table>
             <TableHeader>
               <TableRow>
@@ -92,8 +92,8 @@ export default function TransactionsTable({
                         className={cn(
                           "text-right font-semibold",
                           t.type === "income"
-                            ? "text-green-600"
-                            : "text-red-600"
+                            ? "text-emerald-500"
+                            : "text-red-500"
                         )}
                       >
                         {t.type === "income" ? "+" : "-"}
