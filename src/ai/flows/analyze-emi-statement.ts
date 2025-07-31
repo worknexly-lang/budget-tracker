@@ -30,6 +30,7 @@ const EmiAnalysisSchema = z.object({
   emisPending: z.number().describe('The number of EMIs remaining to be paid.'),
   nextDueDate: z.string().describe('The due date of the next EMI in YYYY-MM-DD format.'),
   status: z.enum(['On Track', 'Delayed']).describe('The current status of the loan payments.'),
+  lastUpdated: z.string().optional().describe('The date the EMI was last marked as paid in ISO format.'),
 });
 export type EmiAnalysis = z.infer<typeof EmiAnalysisSchema>;
 

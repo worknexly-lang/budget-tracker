@@ -23,10 +23,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, Upload, FileText, BarChart, Calendar, Banknote, Hourglass, CheckCircle, XCircle, Save, Trash2, List } from "lucide-react";
+import { Loader2, Upload, FileText, BarChart, Calendar, Banknote, Hourglass, CheckCircle, XCircle, Save, Trash2, List, Check } from "lucide-react";
 import { analyzeEmiStatement, type EmiAnalysis } from "@/ai/flows/analyze-emi-statement";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
+import { format, isThisMonth, parseISO } from "date-fns";
 
 const formSchema = z.object({
   file: z.instanceof(File).refine(file => file.size > 0, "Please upload a file."),
@@ -121,7 +122,7 @@ export default function EmiAnalyzerPage() {
 
   const handleSaveDetails = () => {
     if (analysis) {
-        setSavedLoans(prev => [...prev, analysis]);
+        setSavedLoans(prev => [...prev, { ...analysis, lastUpdated: new Date().toISOString() }]);
         setAnalysis(null);
         toast({
             title: "Loan Saved",
@@ -137,6 +138,27 @@ export default function EmiAnalyzerPage() {
         description: "The loan has been removed from your saved list.",
     });
   };
+
+  const handleMarkAsPaid = (index: number) => {
+    setSavedLoans(prev => {
+        const updatedLoans = [...prev];
+        const loan = updatedLoans[index];
+        if (loan.emisPending > 0) {
+            loan.emisPaid += 1;
+            loan.emisPending -= 1;
+            loan.lastUpdated = new Date().toISOString();
+            if (loan.emisPending === 0) {
+                loan.status = 'On Track'; 
+            }
+        }
+        return updatedLoans;
+    });
+    toast({
+        title: "EMI Marked as Paid",
+        description: "You've successfully tracked this month's payment.",
+    });
+  };
+
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -316,26 +338,41 @@ export default function EmiAnalyzerPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {savedLoans.map((loan, index) => (
-                        <div key={index} className="border p-4 rounded-lg space-y-2 relative">
-                            <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => handleDeleteLoan(index)}>
-                                <Trash2 className="h-4 w-4 text-muted-foreground" />
-                            </Button>
-                            <h3 className="font-semibold text-lg">{loan.loanName}</h3>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
-                                <p><strong>Total:</strong> {formatCurrency(loan.totalAmount)}</p>
-                                <p><strong>EMI:</strong> {formatCurrency(loan.emiAmount)}</p>
-                                <p><strong>Rate:</strong> {loan.interestRate || 'N/A'}%</p>
-                                <p><strong>Paid:</strong> {loan.emisPaid} / {loan.tenure}</p>
-                                <p><strong>Pending:</strong> {loan.emisPending} EMIs</p>
-                                <p><strong>Status:</strong> 
-                                    <span className={`font-bold ${loan.status === 'On Track' ? 'text-green-500' : 'text-red-500'}`}>
-                                        {loan.status}
-                                    </span>
-                                </p>
+                    {savedLoans.map((loan, index) => {
+                        const hasPaidThisMonth = loan.lastUpdated ? isThisMonth(parseISO(loan.lastUpdated)) : false;
+                        const isCompleted = loan.emisPending === 0;
+                        
+                        return (
+                            <div key={index} className="border p-4 rounded-lg space-y-3 relative">
+                                <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => handleDeleteLoan(index)}>
+                                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                </Button>
+                                <h3 className="font-semibold text-lg">{loan.loanName}</h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+                                    <p><strong>Total:</strong> {formatCurrency(loan.totalAmount)}</p>
+                                    <p><strong>EMI:</strong> {formatCurrency(loan.emiAmount)}</p>
+                                    <p><strong>Rate:</strong> {loan.interestRate || 'N/A'}%</p>
+                                    <p><strong>Paid:</strong> {loan.emisPaid} / {loan.tenure}</p>
+                                    <p><strong>Pending:</strong> {loan.emisPending} EMIs</p>
+                                    <p><strong>Status:</strong> 
+                                        <span className={`font-bold ${isCompleted ? 'text-green-500' : (loan.status === 'On Track' ? 'text-green-500' : 'text-red-500')}`}>
+                                            {isCompleted ? 'Completed' : loan.status}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div className="pt-2">
+                                     <Button 
+                                        onClick={() => handleMarkAsPaid(index)}
+                                        disabled={hasPaidThisMonth || isCompleted}
+                                        className="w-full sm:w-auto"
+                                     >
+                                        <Check className="mr-2 h-4 w-4" />
+                                        {hasPaidThisMonth ? 'Paid this month' : 'Mark as Paid'}
+                                     </Button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </CardContent>
             </Card>
         )}
