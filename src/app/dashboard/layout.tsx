@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Home, Settings, DollarSign, BarChartHorizontal } from "lucide-react";
+import { ModeToggle } from '@/components/mode-toggle';
 
 export default function DashboardLayout({
   children,
@@ -54,6 +55,9 @@ export default function DashboardLayout({
         <header className="flex items-center gap-4 p-4 border-b">
           <SidebarTrigger />
           <h2 className="text-xl font-semibold">{getPageTitle()}</h2>
+          <div className="ml-auto">
+            <ModeToggle />
+          </div>
         </header>
         {children}
       </SidebarInset>
