@@ -1,5 +1,7 @@
+
 "use client";
 
+import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Home, Settings, DollarSign, BarChartHorizontal, Target } from "lucide-react";
@@ -30,30 +32,46 @@ export default function DashboardLayout({
           </div>
           <SidebarMenu className="flex-1">
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard" isActive={pathname === '/dashboard'}>
-                <Home />
-                Dashboard
-              </SidebarMenuButton>
+                <Link href="/dashboard" passHref legacyBehavior>
+                    <SidebarMenuButton asChild isActive={pathname === '/dashboard'}>
+                        <a>
+                            <Home />
+                            Dashboard
+                        </a>
+                    </SidebarMenuButton>
+                </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard/analytics" isActive={pathname === '/dashboard/analytics'}>
-                <BarChartHorizontal />
-                Analytics
-              </SidebarMenuButton>
+                <Link href="/dashboard/analytics" passHref legacyBehavior>
+                    <SidebarMenuButton asChild isActive={pathname === '/dashboard/analytics'}>
+                        <a>
+                            <BarChartHorizontal />
+                            Analytics
+                        </a>
+                    </SidebarMenuButton>
+                </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard/savings" isActive={pathname === '/dashboard/savings'}>
-                <Target />
-                Savings
-              </SidebarMenuButton>
+                <Link href="/dashboard/savings" passHref legacyBehavior>
+                    <SidebarMenuButton asChild isActive={pathname === '/dashboard/savings'}>
+                        <a>
+                            <Target />
+                            Savings
+                        </a>
+                    </SidebarMenuButton>
+                </Link>
             </SidebarMenuItem>
           </SidebarMenu>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
-                <Settings />
-                Settings
-              </SidebarMenuButton>
+                <Link href="#" passHref legacyBehavior>
+                    <SidebarMenuButton asChild>
+                        <a>
+                            <Settings />
+                            Settings
+                        </a>
+                    </SidebarMenuButton>
+                </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </div>
