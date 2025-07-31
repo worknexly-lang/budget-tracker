@@ -28,6 +28,22 @@ export default function EmiSummaryCard() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleStorageChange = () => {
+        const storedLoans = localStorage.getItem("savedLoans");
+        if (storedLoans) {
+            setSavedLoans(JSON.parse(storedLoans));
+        }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+
   if (!isMounted) {
     return (
       <Card>
@@ -79,18 +95,10 @@ export default function EmiSummaryCard() {
         ) : (
           <div className="text-center text-muted-foreground py-4">
             <p>No active loans found.</p>
-            <p className="text-xs">Add one in the EMI Analyzer.</p>
+            <p className="text-xs">Add one by uploading a statement.</p>
           </div>
         )}
       </CardContent>
-      <CardFooter>
-        <Button asChild className="w-full">
-          <Link href="/dashboard/emi">
-            Go to EMI Analyzer
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
