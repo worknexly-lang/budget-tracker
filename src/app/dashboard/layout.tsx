@@ -9,6 +9,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import React from "react";
 
 export default function DashboardLayout({
   children,
@@ -19,17 +20,19 @@ export default function DashboardLayout({
   const { user, loading, logout } = useAuth();
   const router = useRouter();
 
-  if (loading) {
+  React.useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
+
+
+  if (loading || !user) {
     return (
         <div className="flex h-screen w-full items-center justify-center">
             <div className="text-2xl font-bold">Loading...</div>
         </div>
     );
-  }
-
-  if (!user) {
-    router.replace('/login');
-    return null;
   }
 
   const getPageTitle = () => {
