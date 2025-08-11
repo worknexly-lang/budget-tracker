@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -5,24 +6,29 @@ import type { Transaction } from "@/types";
 import Overview from "@/components/overview";
 import CategoryChart from "@/components/category-chart";
 import TrendsChart from "@/components/trends-chart";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function AnalyticsDashboard() {
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
+  const getStorageKey = (key: string) => user ? `${key}_${user.uid}` : null;
+
   useEffect(() => {
     setIsMounted(true);
-    const storedTransactions = localStorage.getItem("transactions");
+    if (!user) return;
+    const storedTransactions = localStorage.getItem(getStorageKey("transactions")!);
     if (storedTransactions) {
       setTransactions(JSON.parse(storedTransactions));
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem("transactions", JSON.stringify(transactions));
+    if (isMounted && user) {
+      localStorage.setItem(getStorageKey("transactions")!, JSON.stringify(transactions));
     }
-  }, [transactions, isMounted]);
+  }, [transactions, isMounted, user]);
 
   const { totalIncome, totalExpenses, balance } = useMemo(() => {
     const totalIncome = transactions
@@ -35,7 +41,7 @@ export default function AnalyticsDashboard() {
     return { totalIncome, totalExpenses, balance };
   }, [transactions]);
   
-  if (!isMounted) {
+  if (!isMounted || !user) {
     // You can render a loading skeleton here
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">

@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -27,6 +28,10 @@ export default function SavingsGoal({
   onSetGoal,
 }: SavingsGoalProps) {
   const [newGoal, setNewGoal] = useState<string>(goal.toString());
+
+  useEffect(() => {
+    setNewGoal(goal.toString());
+  }, [goal]);
 
   const progress = useMemo(() => {
     if (goal <= 0) return 0;

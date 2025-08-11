@@ -4,8 +4,11 @@
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { Home, Settings, DollarSign, BarChartHorizontal, Target, FileText } from "lucide-react";
+import { Home, Settings, DollarSign, BarChartHorizontal, Target, FileText, LogOut } from "lucide-react";
 import { ModeToggle } from '@/components/mode-toggle';
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardLayout({
   children,
@@ -13,6 +16,21 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  if (loading) {
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <div className="text-2xl font-bold">Loading...</div>
+        </div>
+    );
+  }
+
+  if (!user) {
+    router.replace('/login');
+    return null;
+  }
 
   const getPageTitle = () => {
     if (pathname === '/dashboard') return 'Overview';
@@ -21,6 +39,11 @@ export default function DashboardLayout({
     if (pathname === '/dashboard/emi') return 'EMI Analyzer';
     return 'Dashboard';
   }
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
   return (
     <SidebarProvider>
@@ -74,6 +97,12 @@ export default function DashboardLayout({
             </SidebarMenuItem>
           </SidebarMenu>
           <SidebarMenu>
+             <SidebarMenuItem>
+                <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+                    <LogOut />
+                    Logout
+                </Button>
+            </SidebarMenuItem>
             <SidebarMenuItem>
                 <Link href="#">
                     <SidebarMenuButton asChild>
@@ -91,7 +120,8 @@ export default function DashboardLayout({
         <header className="flex items-center gap-4 p-4 border-b">
           <SidebarTrigger />
           <h2 className="text-xl font-semibold">{getPageTitle()}</h2>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-4">
+            <span className="text-sm text-muted-foreground hidden sm:inline-block">{user.email}</span>
             <ModeToggle />
           </div>
         </header>

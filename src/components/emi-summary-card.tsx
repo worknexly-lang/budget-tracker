@@ -16,22 +16,28 @@ import { FileText, ArrowRight } from "lucide-react";
 import type { EmiAnalysis } from "@/ai/flows/analyze-emi-statement";
 import { isThisMonth, parseISO } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function EmiSummaryCard() {
+  const { user } = useAuth();
   const [savedLoans, setSavedLoans] = useState<EmiAnalysis[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
+  const getStorageKey = (key: string) => user ? `${key}_${user.uid}` : null;
+
   useEffect(() => {
     setIsMounted(true);
-    const storedLoans = localStorage.getItem("savedLoans");
+    if (!user) return;
+    const storedLoans = localStorage.getItem(getStorageKey("savedLoans")!);
     if (storedLoans) {
       setSavedLoans(JSON.parse(storedLoans));
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const handleStorageChange = () => {
-        const storedLoans = localStorage.getItem("savedLoans");
+        if (!user) return;
+        const storedLoans = localStorage.getItem(getStorageKey("savedLoans")!);
         if (storedLoans) {
             setSavedLoans(JSON.parse(storedLoans));
         }
@@ -42,7 +48,7 @@ export default function EmiSummaryCard() {
     return () => {
         window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [user]);
 
 
   if (!isMounted) {

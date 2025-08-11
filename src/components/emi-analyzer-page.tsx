@@ -30,18 +30,22 @@ import { formatCurrency } from "@/lib/utils";
 import { format, isThisMonth, parseISO } from "date-fns";
 import EmiSummaryCard from "./emi-summary-card";
 import type { Transaction } from "@/types";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   file: z.instanceof(File).refine(file => file.size > 0, "Please upload a file."),
 });
 
 export default function EmiAnalyzerPage() {
+  const { user } = useAuth();
   const [analysis, setAnalysis] = useState<EmiAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [savedLoans, setSavedLoans] = useState<EmiAnalysis[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   const { toast } = useToast();
+
+  const getStorageKey = (key: string) => user ? `${key}_${user.uid}` : null;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,17 +56,18 @@ export default function EmiAnalyzerPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    const storedLoans = localStorage.getItem("savedLoans");
+    if (!user) return;
+    const storedLoans = localStorage.getItem(getStorageKey("savedLoans")!);
     if (storedLoans) {
       setSavedLoans(JSON.parse(storedLoans));
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem("savedLoans", JSON.stringify(savedLoans));
+    if (isMounted && user) {
+      localStorage.setItem(getStorageKey("savedLoans")!, JSON.stringify(savedLoans));
     }
-  }, [savedLoans, isMounted]);
+  }, [savedLoans, isMounted, user]);
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -155,27 +160,38 @@ export default function EmiAnalyzerPage() {
         updatedLoans[index] = loanToUpdate;
         setSavedLoans(updatedLoans);
 
-        // Add transaction
-        const newTransaction: Transaction = {
-            id: crypto.randomUUID(),
-            type: "expense",
-            category: "Bills",
-            amount: loanToUpdate.emiAmount,
-            description: `EMI for ${loanToUpdate.loanName}`,
-            date: new Date().toISOString(),
-        };
+        if (user) {
+            const newTransaction: Transaction = {
+                id: crypto.randomUUID(),
+                type: "expense",
+                category: "Bills",
+                amount: loanToUpdate.emiAmount,
+                description: `EMI for ${loanToUpdate.loanName}`,
+                date: new Date().toISOString(),
+            };
 
-        const storedTransactions = localStorage.getItem("transactions");
-        const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
-        localStorage.setItem("transactions", JSON.stringify([newTransaction, ...transactions]));
+            const storedTransactions = localStorage.getItem(getStorageKey("transactions")!);
+            const transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+            localStorage.setItem(getStorageKey("transactions")!, JSON.stringify([newTransaction, ...transactions]));
 
-        toast({
-            title: "EMI Marked as Paid",
-            description: "An expense transaction has been automatically created.",
-        });
+            toast({
+                title: "EMI Marked as Paid",
+                description: "An expense transaction has been automatically created.",
+            });
+        }
     }
   };
 
+
+  if (!isMounted || !user) {
+    return (
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">EMI Analyzer</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">

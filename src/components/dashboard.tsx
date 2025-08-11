@@ -9,36 +9,40 @@ import TransactionsTable from "@/components/transactions-table";
 import CategoryChart from "@/components/category-chart";
 import AddTransactionForm from "@/components/add-transaction-form";
 import EmiSummaryCard from "@/components/emi-summary-card";
-import { DollarSign } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [savingsGoal, setSavingsGoal] = useState<number>(1000);
   const [isMounted, setIsMounted] = useState(false);
 
+  const getStorageKey = (key: string) => user ? `${key}_${user.uid}` : null;
+
   useEffect(() => {
     setIsMounted(true);
-    const storedTransactions = localStorage.getItem("transactions");
-    const storedSavingsGoal = localStorage.getItem("savingsGoal");
+    if (!user) return;
+    const storedTransactions = localStorage.getItem(getStorageKey("transactions")!);
+    const storedSavingsGoal = localStorage.getItem(getStorageKey("savingsGoal")!);
     if (storedTransactions) {
       setTransactions(JSON.parse(storedTransactions));
     }
     if (storedSavingsGoal) {
       setSavingsGoal(JSON.parse(storedSavingsGoal));
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem("transactions", JSON.stringify(transactions));
+    if (isMounted && user) {
+      localStorage.setItem(getStorageKey("transactions")!, JSON.stringify(transactions));
     }
-  }, [transactions, isMounted]);
+  }, [transactions, isMounted, user]);
 
   useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem("savingsGoal", JSON.stringify(savingsGoal));
+    if (isMounted && user) {
+      localStorage.setItem(getStorageKey("savingsGoal")!, JSON.stringify(savingsGoal));
     }
-  }, [savingsGoal, isMounted]);
+  }, [savingsGoal, isMounted, user]);
 
   const { totalIncome, totalExpenses, balance } = useMemo(() => {
     const totalIncome = transactions
@@ -64,7 +68,7 @@ export default function Dashboard() {
     setTransactions((prev) => prev.filter((t) => t.id !== id));
   };
   
-  if (!isMounted) {
+  if (!isMounted || !user) {
     // You can render a loading skeleton here
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
