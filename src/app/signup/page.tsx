@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -25,11 +25,21 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
+const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
+        <title>Google</title>
+        <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.9-5.02 1.9-4.5 0-8.19-3.67-8.19-8.19s3.69-8.19 8.19-8.19c2.52 0 4.29 1.02 5.28 2.02l2.6-2.6C18.44 1.16 15.68 0 12.48 0 5.88 0 .04 5.88.04 12.48s5.84 12.48 12.44 12.48c3.43 0 6.23-1.12 8.32-3.23 2.1-2.1 2.84-5.2 2.84-7.64 0-.74-.07-1.44-.2-2.16H12.48z" />
+    </svg>
+);
+
+
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,6 +67,26 @@ export default function SignupPage() {
       });
     } finally {
         setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+    try {
+        await signInWithPopup(auth, provider);
+        toast({
+            title: "Account Created",
+            description: "You have been successfully signed up.",
+        });
+        router.push("/dashboard");
+    } catch (error: any) {
+        toast({
+            title: "Google Sign-Up Failed",
+            description: error.message,
+            variant: "destructive",
+        });
+    } finally {
+        setIsGoogleLoading(false);
     }
   }
 
@@ -111,19 +141,33 @@ export default function SignupPage() {
               />
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign Up
               </Button>
+            </CardFooter>
+          </form>
+        </Form>
+         <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+        </div>
+        <CardFooter className="flex flex-col gap-4">
+             <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+                {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+                Sign up with Google
+            </Button>
               <p className="text-sm text-center text-muted-foreground">
                 Already have an account?{' '}
                 <Link href="/login" className="text-primary hover:underline">
                   Login
                 </Link>
               </p>
-            </CardFooter>
-          </form>
-        </Form>
+        </CardFooter>
       </Card>
     </div>
   );
