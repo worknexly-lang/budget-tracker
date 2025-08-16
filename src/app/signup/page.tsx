@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { app } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -38,7 +38,6 @@ export default function SignupPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
   const form = useForm<z.infer<typeof formSchema>>({
